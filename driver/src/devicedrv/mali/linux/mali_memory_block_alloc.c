@@ -1,9 +1,9 @@
 /*
  * Copyright (C) 2010-2016 ARM Limited. All rights reserved.
- * 
+ *
  * This program is free software and is provided to you under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation, and any use by you of this program is subject to the terms of such GNU licence.
- * 
+ *
  * A copy of the licence is included with the program, and can also be obtained from Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
@@ -357,6 +357,7 @@ u32 mali_mem_block_allocator_stat(void)
 {
 	mali_block_allocator *allocator = mali_mem_block_gobal_allocator;
 	MALI_DEBUG_ASSERT_POINTER(allocator);
+
 
 	return (allocator->total_num - atomic_read(&allocator->free_num)) * _MALI_OSK_MALI_PAGE_SIZE;
 }

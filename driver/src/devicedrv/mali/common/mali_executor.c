@@ -1459,7 +1459,7 @@ static mali_bool mali_executor_virtual_group_is_usable(void)
 #if (defined(CONFIG_MALI450) || defined(CONFIG_MALI470))
 	MALI_DEBUG_ASSERT_EXECUTOR_LOCK_HELD();
 	return ((EXEC_STATE_INACTIVE == virtual_group_state ||
-		 EXEC_STATE_IDLE == virtual_group_state) && (virtual_group->state != MALI_GROUP_STATE_ACTIVATION_PENDING)) ?
+		EXEC_STATE_IDLE == virtual_group_state) && (virtual_group->state != MALI_GROUP_STATE_ACTIVATION_PENDING)) ?
 	       MALI_TRUE : MALI_FALSE;
 #else
 	return MALI_FALSE;

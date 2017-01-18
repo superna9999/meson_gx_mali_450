@@ -21,6 +21,8 @@
 #include "mali_osk_profiling.h"
 #endif
 
+#include <mali_platform.h>
+
 /* Number of frame registers on Mali-200 */
 #define MALI_PP_MALI200_NUM_FRAME_REGISTERS ((0x04C/4)+1)
 /* Number of frame registers on Mali-300 and later */
@@ -149,6 +151,8 @@ _mali_osk_errcode_t mali_pp_stop_bus_wait(struct mali_pp_core *core)
 
 	if (MALI_REG_POLL_COUNT_FAST == i) {
 		MALI_PRINT_ERROR(("Mali PP: Failed to stop bus on %s. Status: 0x%08x\n", core->hw_core.description, mali_hw_core_register_read(&core->hw_core, MALI200_REG_ADDR_MGMT_STATUS)));
+		if (mali_gp_reset_fail < 65533)
+			mali_gp_reset_fail++;
 		return _MALI_OSK_ERR_FAULT;
 	}
 	return _MALI_OSK_ERR_OK;
@@ -201,6 +205,7 @@ static const u32 mali_wb_registers_reset_values[_MALI_PP_MAX_WB_REGISTERS] = {
 /* Performance Counter 0 Enable Register reset value */
 static const u32 mali_perf_cnt_enable_reset_value = 0;
 
+extern int pp_hardware_reset;
 _mali_osk_errcode_t mali_pp_hard_reset(struct mali_pp_core *core)
 {
 	/* Bus must be stopped before calling this function */
@@ -211,6 +216,7 @@ _mali_osk_errcode_t mali_pp_hard_reset(struct mali_pp_core *core)
 
 	MALI_DEBUG_ASSERT_POINTER(core);
 	MALI_DEBUG_PRINT(2, ("Mali PP: Hard reset of core %s\n", core->hw_core.description));
+	pp_hardware_reset ++;
 
 	/* Set register to a bogus value. The register will be used to detect when reset is complete */
 	mali_hw_core_register_write_relaxed(&core->hw_core, reset_wait_target_register, reset_invalid_value);

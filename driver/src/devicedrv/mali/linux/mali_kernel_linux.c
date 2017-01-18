@@ -90,7 +90,18 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(mali_sw_counters);
 
 /* from the __malidrv_build_info.c file that is generated during build */
 extern const char *__malidrv_build_info(void);
+extern void mali_post_init(void);
+extern int mali_pdev_dts_init(struct platform_device* mali_gpu_device);
+extern int mpgpu_class_init(void);
+extern void mpgpu_class_exit(void);
 
+int mali_page_fault = 0;
+module_param(mali_page_fault, int, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH); /* rw-rw-r-- */
+MODULE_PARM_DESC(mali_page_fault, "mali_page_fault");
+
+int pp_hardware_reset = 0;
+module_param(pp_hardware_reset, int, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH); /* rw-rw-r-- */
+MODULE_PARM_DESC(pp_hardware_reset, "mali_hardware_reset");
 /* Module parameter to control log level */
 int mali_debug_level = 2;
 module_param(mali_debug_level, int, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH); /* rw-rw-r-- */
@@ -396,7 +407,7 @@ int mali_module_init(void)
 	int err = 0;
 
 	MALI_DEBUG_PRINT(2, ("Inserting Mali v%d device driver. \n", _MALI_API_VERSION));
-	MALI_DEBUG_PRINT(2, ("Compiled: %s, time: %s.\n", __DATE__, __TIME__));
+	//MALI_DEBUG_PRINT(2, ("Compiled: %s, time: %s.\n", __DATE__, __TIME__));
 	MALI_DEBUG_PRINT(2, ("Driver revision: %s\n", SVN_REV_STRING));
 
 #if MALI_ENABLE_CPU_CYCLES
@@ -454,6 +465,8 @@ int mali_module_init(void)
 
 	MALI_PRINT(("Mali device driver loaded\n"));
 
+	mpgpu_class_init();
+
 	return 0; /* Success */
 }
 
@@ -483,6 +496,7 @@ void mali_module_exit(void)
 #if defined(CONFIG_MALI400_INTERNAL_PROFILING)
 	_mali_internal_profiling_term();
 #endif
+	mpgpu_class_exit();
 
 	MALI_PRINT(("Mali device driver unloaded\n"));
 }
@@ -591,6 +605,7 @@ static int mali_probe(struct platform_device *pdev)
 				err = mali_sysfs_register(mali_dev_name);
 
 				if (0 == err) {
+					mali_post_init();
 					MALI_DEBUG_PRINT(2, ("mali_probe(): Successfully initialized driver for platform device %s\n", pdev->name));
 
 					return 0;

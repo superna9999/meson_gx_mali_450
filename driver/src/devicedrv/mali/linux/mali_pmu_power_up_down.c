@@ -17,7 +17,11 @@
 
 int mali_perf_set_num_pp_cores(unsigned int num_cores)
 {
+#ifndef CONFIG_MALI_DVFS
+	return mali_executor_set_perf_level(num_cores, MALI_TRUE);
+#else
 	return mali_executor_set_perf_level(num_cores, MALI_FALSE);
+#endif
 }
 
 EXPORT_SYMBOL(mali_perf_set_num_pp_cores);

@@ -619,6 +619,9 @@ void mali_timeline_system_release_waiter_list(struct mali_timeline_system *syste
 		struct mali_timeline_waiter *tail,
 		struct mali_timeline_waiter *head)
 {
+	struct mali_timeline_waiter    *waiter = NULL;
+	struct mali_timeline_waiter    *next = NULL;
+
 	MALI_DEBUG_ASSERT_POINTER(system);
 	MALI_DEBUG_ASSERT_POINTER(head);
 	MALI_DEBUG_ASSERT_POINTER(tail);
@@ -626,6 +629,14 @@ void mali_timeline_system_release_waiter_list(struct mali_timeline_system *syste
 
 	head->tracker_next = system->waiter_empty_list;
 	system->waiter_empty_list = tail;
+
+	waiter = system->waiter_empty_list;
+	while (NULL != waiter) {
+		next = waiter->tracker_next;
+		_mali_osk_free(waiter);
+		waiter = next;
+	}
+	system->waiter_empty_list = NULL;
 }
 
 static mali_scheduler_mask mali_timeline_tracker_activate(struct mali_timeline_tracker *tracker)

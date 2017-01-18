@@ -143,6 +143,7 @@ export EXTRA_DEFINES += -DCONFIG_MALI_SHARED_INTERRUPTS
 endif
 
 ifeq ($(USING_DVFS),1)
+	xxxyyyy
 export CONFIG_MALI_DVFS=y
 export EXTRA_DEFINES += -DCONFIG_MALI_DVFS
 endif

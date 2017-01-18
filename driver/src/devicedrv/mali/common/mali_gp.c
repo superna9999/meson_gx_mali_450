@@ -20,6 +20,8 @@
 #include "mali_osk_profiling.h"
 #endif
 
+#include <mali_platform.h>
+
 static struct mali_gp_core *mali_global_gp_core = NULL;
 
 /* Interrupt handlers */
@@ -110,6 +112,8 @@ _mali_osk_errcode_t mali_gp_stop_bus_wait(struct mali_gp_core *core)
 
 	if (MALI_REG_POLL_COUNT_SLOW == i) {
 		MALI_PRINT_ERROR(("Mali GP: Failed to stop bus on %s\n", core->hw_core.description));
+		if (mali_gp_reset_fail < 65533)
+			mali_gp_reset_fail++;
 		return _MALI_OSK_ERR_FAULT;
 	}
 	return _MALI_OSK_ERR_OK;
@@ -177,6 +181,8 @@ _mali_osk_errcode_t mali_gp_reset_wait(struct mali_gp_core *core)
 	if (i == MALI_REG_POLL_COUNT_FAST) {
 		MALI_PRINT_ERROR(("Mali GP: Failed to reset core %s, rawstat: 0x%08x\n",
 				  core->hw_core.description, rawstat));
+		if (mali_gp_reset_fail < 65533)
+			mali_gp_reset_fail++;
 		return _MALI_OSK_ERR_FAULT;
 	}
 
