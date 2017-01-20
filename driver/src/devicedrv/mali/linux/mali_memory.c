@@ -64,7 +64,11 @@ static int mali_mem_vma_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
 	int ret;
 	int prefetch_num = MALI_VM_NUM_FAULT_PREFETCH;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
+	unsigned long address = (unsigned long)vmf->address;
+#else
 	unsigned long address = (unsigned long)vmf->virtual_address;
+#endif
 	MALI_DEBUG_ASSERT(alloc->backend_handle);
 	MALI_DEBUG_ASSERT((unsigned long)alloc->cpu_mapping.addr <= address);
 
