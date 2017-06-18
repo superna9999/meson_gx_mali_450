@@ -18,6 +18,8 @@
 #define __MALI_OSK_SPECIFIC_H__
 
 #include <asm/uaccess.h>
+#include <linux/uaccess.h>
+
 #include <linux/platform_device.h>
 #include <linux/gfp.h>
 #include <linux/hardirq.h>
