@@ -57,9 +57,19 @@ static void mali_mem_vma_close(struct vm_area_struct *vma)
 	vma->vm_private_data = NULL;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 static int mali_mem_vma_fault(struct vm_fault *vmf)
+#else
+static int mali_mem_vma_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
+#endif
 {
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 	mali_mem_allocation *alloc = (mali_mem_allocation *)vmf->vma->vm_private_data;
+#else
+	mali_mem_allocation *alloc = (mali_mem_allocation *)vma->vm_private_data;
+#endif
+
 	mali_mem_backend *mem_bkend = NULL;
 	int ret;
 	int prefetch_num = MALI_VM_NUM_FAULT_PREFETCH;
@@ -88,8 +98,13 @@ static int mali_mem_vma_fault(struct vm_fault *vmf)
 		/*check if use page fault to do COW*/
 		MALI_DEBUG_PRINT(4, ("mali_vma_fault: do cow allocate on demand!, address=0x%x\n", address));
 		mutex_lock(&mem_bkend->mutex);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 		ret = mali_mem_cow_allocate_on_demand(mem_bkend,
 						      (address - vmf->vma->vm_start) / PAGE_SIZE);
+#else
+		ret = mali_mem_cow_allocate_on_demand(mem_bkend,
+						      (address - vma->vm_start) / PAGE_SIZE);
+#endif
 		mutex_unlock(&mem_bkend->mutex);
 
 		if (ret != _MALI_OSK_ERR_OK) {
@@ -101,7 +116,11 @@ static int mali_mem_vma_fault(struct vm_fault *vmf)
 		 we zap the mapping in cow_modify_range, it will trigger page fault
 		 when CPU access it, so here we map it to CPU*/
 		mutex_lock(&mem_bkend->mutex);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 		ret = mali_mem_cow_cpu_map_pages_locked(mem_bkend, vmf->vma, address, prefetch_num);
+#else
+		ret = mali_mem_cow_cpu_map_pages_locked(mem_bkend, vma, address, prefetch_num);
+#endif
 		mutex_unlock(&mem_bkend->mutex);
 
 		if (unlikely(ret != _MALI_OSK_ERR_OK)) {
@@ -109,7 +128,11 @@ static int mali_mem_vma_fault(struct vm_fault *vmf)
 		}
 	} else if ((mem_bkend->type == MALI_MEM_SWAP) ||
 		   (mem_bkend->type == MALI_MEM_COW && (mem_bkend->flags & MALI_MEM_BACKEND_FLAG_SWAP_COWED))) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 12, 0)
 		u32 offset_in_bkend = (address - vmf->vma->vm_start) / PAGE_SIZE;
+#else
+		u32 offset_in_bkend = (address - vma->vm_start) / PAGE_SIZE;
+#endif
 		int ret = _MALI_OSK_ERR_OK;
 
 		mutex_lock(&mem_bkend->mutex);
