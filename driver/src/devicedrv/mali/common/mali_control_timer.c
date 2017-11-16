@@ -28,7 +28,7 @@ void mali_control_timer_add(u32 timeout)
 	_mali_osk_timer_add(mali_control_timer, _mali_osk_time_mstoticks(timeout));
 }
 
-static void mali_control_timer_callback(void *arg)
+static void mali_control_timer_callback(struct timer_list *t)
 {
 	if (mali_utilization_enabled()) {
 		struct mali_gpu_utilization_data *util_data = NULL;
