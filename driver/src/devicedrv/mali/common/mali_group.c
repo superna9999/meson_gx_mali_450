@@ -44,7 +44,7 @@ int mali_max_job_runtime = MALI_MAX_JOB_RUNTIME_DEFAULT;
 static void mali_group_bottom_half_mmu(void *data);
 static void mali_group_bottom_half_gp(void *data);
 static void mali_group_bottom_half_pp(void *data);
-static void mali_group_timeout(void *data);
+static void mali_group_timeout(struct timer_list *t);
 static void mali_group_reset_pp(struct mali_group *group);
 static void mali_group_reset_mmu(struct mali_group *group);
 
@@ -1761,9 +1761,11 @@ static void mali_group_bottom_half_pp(void *data)
 				      0xFFFFFFFF, 0);
 }
 
-static void mali_group_timeout(void *data)
+static void mali_group_timeout(struct timer_list *t)
 {
-	struct mali_group *group = (struct mali_group *)data;
+	_mali_osk_timer_t *tim = container_of(t, _mali_osk_timer_t, timer);
+	struct mali_group *group = container_of(&tim, struct mali_group, timeout_timer);
+
 	MALI_DEBUG_ASSERT_POINTER(group);
 
 	MALI_DEBUG_PRINT(2, ("Group: timeout handler for %s at %u\n",
