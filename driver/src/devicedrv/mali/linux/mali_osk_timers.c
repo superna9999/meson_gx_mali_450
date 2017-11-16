@@ -18,16 +18,25 @@
 #include "mali_osk.h"
 #include "mali_kernel_common.h"
 
-struct _mali_osk_timer_t_struct {
-	struct timer_list timer;
-};
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
+
+#define TIMER_DATA_TYPE		unsigned long
+#define TIMER_FUNC_TYPE		void (*)(TIMER_DATA_TYPE)
+
+static inline void timer_setup(struct timer_list *timer,
+			       void (*callback)(struct timer_list *),
+			       unsigned int flags)
+{
+	__setup_timer(timer, (TIMER_FUNC_TYPE)callback,
+		      (TIMER_DATA_TYPE)timer, flags);
+}
+#endif
 
 typedef void (*timer_timeout_function_t)(unsigned long);
 
 _mali_osk_timer_t *_mali_osk_timer_init(void)
 {
 	_mali_osk_timer_t *t = (_mali_osk_timer_t *)kmalloc(sizeof(_mali_osk_timer_t), GFP_KERNEL);
-	if (NULL != t) init_timer(&t->timer);
 	return t;
 }
 
@@ -65,8 +74,7 @@ mali_bool _mali_osk_timer_pending(_mali_osk_timer_t *tim)
 void _mali_osk_timer_setcallback(_mali_osk_timer_t *tim, _mali_osk_timer_callback_t callback, void *data)
 {
 	MALI_DEBUG_ASSERT_POINTER(tim);
-	tim->timer.data = (unsigned long)data;
-	tim->timer.function = (timer_timeout_function_t)callback;
+	timer_setup(&tim->timer, callback, 0);
 }
 
 void _mali_osk_timer_term(_mali_osk_timer_t *tim)

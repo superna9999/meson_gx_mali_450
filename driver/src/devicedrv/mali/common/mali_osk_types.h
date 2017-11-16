@@ -50,6 +50,7 @@ typedef unsigned long long u64;
 #include <linux/types.h>
 #endif
 
+#include <linux/timer.h>
 /** @brief Mali Boolean type which uses MALI_TRUE and MALI_FALSE
   */
 typedef unsigned long mali_bool;
@@ -395,7 +396,12 @@ typedef struct _mali_osk_notification_t_struct {
  * by any callers of _mali_osk_timer_del(). Otherwise, a deadlock may occur.
  *
  * @param arg Function-specific data */
-typedef void (*_mali_osk_timer_callback_t)(void *arg);
+typedef void (*_mali_osk_timer_callback_t)(struct timer_list *t);
+
+
+struct _mali_osk_timer_t_struct {
+	struct timer_list timer;
+};
 
 /** @brief Private type for Timer Callback Objects */
 typedef struct _mali_osk_timer_t_struct _mali_osk_timer_t;
