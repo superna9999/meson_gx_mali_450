@@ -143,6 +143,12 @@ int mali_platform_device_register(void)
 		goto err_put_node;
 	}
 
+	dev_set_name(&dev->dev, "mali-utgard");
+	dev->dev.of_node = np;
+	dev->dev.dma_mask = &dev->dev.coherent_dma_mask;
+	dev->dev.coherent_dma_mask = DMA_BIT_MASK(32);
+	dev->dev.bus = &platform_bus_type;
+
 	core = of_clk_get_by_name(np, "core");
 	if (IS_ERR(core)) {
 		pr_err("Couldn't retrieve our module clock\n");
