@@ -204,7 +204,9 @@ int mali_mem_os_alloc_pages(mali_mem_os_mem *os_mem, u32 size)
 	/* Allocate new pages, if needed. */
 	for (i = 0; i < remaining; i++) {
 		dma_addr_t dma_addr;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+		gfp_t flags = __GFP_ZERO | __GFP_NOWARN;
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)
 		gfp_t flags = __GFP_ZERO | __GFP_NOWARN | __GFP_COLD;
 #else
 		gfp_t flags = __GFP_ZERO | __GFP_REPEAT | __GFP_NOWARN | __GFP_COLD;

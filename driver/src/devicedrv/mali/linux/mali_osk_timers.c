@@ -20,14 +20,21 @@
 
 struct _mali_osk_timer_t_struct {
 	struct timer_list timer;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+	unsigned long data;
+#endif
 };
 
-typedef void (*timer_timeout_function_t)(unsigned long);
+typedef void (*timer_timeout_function_t)(struct timer_list *);
 
 _mali_osk_timer_t *_mali_osk_timer_init(void)
 {
 	_mali_osk_timer_t *t = (_mali_osk_timer_t *)kmalloc(sizeof(_mali_osk_timer_t), GFP_KERNEL);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+	if (NULL != t) timer_setup(&t->timer, NULL, 0);
+#else
 	if (NULL != t) init_timer(&t->timer);
+#endif
 	return t;
 }
 
@@ -65,7 +72,11 @@ mali_bool _mali_osk_timer_pending(_mali_osk_timer_t *tim)
 void _mali_osk_timer_setcallback(_mali_osk_timer_t *tim, _mali_osk_timer_callback_t callback, void *data)
 {
 	MALI_DEBUG_ASSERT_POINTER(tim);
-	tim->timer.data = (unsigned long)data;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+	tim->data = (unsigned long)data;
+#else
+	tim->time.data = (unsigned long)data;
+#endif
 	tim->timer.function = (timer_timeout_function_t)callback;
 }
 
