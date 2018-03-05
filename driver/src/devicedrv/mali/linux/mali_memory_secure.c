@@ -13,7 +13,11 @@
 #include "mali_memory_secure.h"
 #include "mali_osk.h"
 #include <linux/mutex.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
+#include <linux/dma-direct.h>
+#else
 #include <linux/dma-mapping.h>
+#endif
 #include <linux/dma-buf.h>
 
 _mali_osk_errcode_t mali_mem_secure_attach_dma_buf(mali_mem_secure *secure_mem, u32 size, int mem_fd)
