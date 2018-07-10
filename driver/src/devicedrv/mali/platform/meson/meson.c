@@ -60,6 +60,7 @@
 #include <linux/io.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/version.h>
 #include <linux/of.h>
 #include <linux/of_device.h>
 #include <linux/of_address.h>
@@ -245,7 +246,11 @@ int mali_platform_device_register(void)
 		goto err_free_resources;
 	}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 18, 0)
+	of_dma_configure(&dev->dev, np, true);
+#else
 	of_dma_configure(&dev->dev, np);
+#endif
 
 	of_clk_set_defaults(np, false);
 
