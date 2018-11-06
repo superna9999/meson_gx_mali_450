@@ -523,7 +523,7 @@ int mali_mem_cow_cpu_map(mali_mem_backend *mem_bkend, struct vm_area_struct *vma
 {
 	mali_mem_cow *cow = &mem_bkend->cow_mem;
 	struct mali_page_node *m_page;
-	int ret;
+	vm_fault_t ret;
 	unsigned long addr = vma->vm_start;
 	MALI_DEBUG_ASSERT(mem_bkend->type == MALI_MEM_COW);
 
@@ -532,7 +532,7 @@ int mali_mem_cow_cpu_map(mali_mem_backend *mem_bkend, struct vm_area_struct *vma
 		 * flush which makes it way slower than remap_pfn_range or vm_insert_pfn.
 		ret = vm_insert_page(vma, addr, page);
 		*/
-		ret = vm_insert_pfn(vma, addr, _mali_page_node_get_pfn(m_page));
+		ret = vmf_insert_pfn(vma, addr, _mali_page_node_get_pfn(m_page));
 
 		if (unlikely(0 != ret)) {
 			return ret;
@@ -557,7 +557,7 @@ _mali_osk_errcode_t mali_mem_cow_cpu_map_pages_locked(mali_mem_backend *mem_bken
 {
 	mali_mem_cow *cow = &mem_bkend->cow_mem;
 	struct mali_page_node *m_page;
-	int ret;
+	vm_fault_t ret;
 	int offset;
 	int count ;
 	unsigned long vstart = vma->vm_start;
@@ -569,7 +569,7 @@ _mali_osk_errcode_t mali_mem_cow_cpu_map_pages_locked(mali_mem_backend *mem_bken
 
 	list_for_each_entry(m_page, &cow->pages, list) {
 		if ((count >= offset) && (count < offset + num)) {
-			ret = vm_insert_pfn(vma, vaddr, _mali_page_node_get_pfn(m_page));
+			ret = vmf_insert_pfn(vma, vaddr, _mali_page_node_get_pfn(m_page));
 
 			if (unlikely(0 != ret)) {
 				if (count == offset) {
