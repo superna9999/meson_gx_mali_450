@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include <linux/cdev.h>     /* character device definitions */
+#include <linux/mm.h>
 #include <linux/idr.h>
 #include <linux/rbtree.h>
 #include "mali_kernel_license.h"
@@ -27,6 +28,15 @@ extern struct platform_device *mali_platform_device;
 /* After 3.19.0 kenrel droped CONFIG_PM_RUNTIME define,define by ourself */
 #if defined(CONFIG_PM) && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
 #define CONFIG_PM_RUNTIME 1
+#endif
+
+/*
+ * From 4.20.0 kernel vm_insert_pfn was dropped
+ * Make wrapper to preserve compatibility
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)
+extern int vm_insert_pfn(struct vm_area_struct *vma, unsigned long addr,
+			 unsigned long pfn);
 #endif
 
 #ifdef __cplusplus
