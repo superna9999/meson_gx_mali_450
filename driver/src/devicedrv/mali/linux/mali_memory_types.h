@@ -13,19 +13,6 @@
 
 #include <linux/mm.h>
 
-/* vm_fault_t was introduced in 4.17, and is typedef int as of 4.20 */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,17,0))
-typedef int vm_fault_t;
-#endif
-
-/*
- * vm_insert_pfn() was removed in 4.20. The new vmf_insert_pfn returns
- * vm_fault_t, which is non-zero on error.
- */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,20,0))
-#define vmf_insert_pfn vm_insert_pfn
-#endif
-
 #if defined(CONFIG_MALI400_UMP)
 #include "ump_kernel_interface.h"
 #endif
