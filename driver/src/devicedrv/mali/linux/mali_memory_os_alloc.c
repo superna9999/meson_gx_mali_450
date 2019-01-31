@@ -368,7 +368,7 @@ int mali_mem_os_cpu_map(mali_mem_backend *mem_bkend, struct vm_area_struct *vma)
 	mali_mem_os_mem *os_mem = &mem_bkend->os_mem;
 	struct mali_page_node *m_page;
 	struct page *page;
-	vm_fault_t ret;
+	int ret;
 	unsigned long addr = vma->vm_start;
 	MALI_DEBUG_ASSERT(MALI_MEM_OS == mem_bkend->type);
 
@@ -378,7 +378,7 @@ int mali_mem_os_cpu_map(mali_mem_backend *mem_bkend, struct vm_area_struct *vma)
 		ret = vm_insert_page(vma, addr, page);
 		*/
 		page = m_page->page;
-		ret = vmf_insert_pfn(vma, addr, page_to_pfn(page));
+		ret = vm_insert_pfn(vma, addr, page_to_pfn(page));
 
 		if (unlikely(0 != ret)) {
 			return -EFAULT;
@@ -393,7 +393,7 @@ _mali_osk_errcode_t mali_mem_os_resize_cpu_map_locked(mali_mem_backend *mem_bken
 {
 	mali_mem_os_mem *os_mem = &mem_bkend->os_mem;
 	struct mali_page_node *m_page;
-	vm_fault_t ret;
+	int ret;
 	int offset;
 	int mapping_page_num;
 	int count ;
@@ -416,7 +416,7 @@ _mali_osk_errcode_t mali_mem_os_resize_cpu_map_locked(mali_mem_backend *mem_bken
 
 			vm_end -= _MALI_OSK_MALI_PAGE_SIZE;
 			if (mapping_page_num > 0) {
-				ret = vmf_insert_pfn(vma, vm_end, page_to_pfn(m_page->page));
+				ret = vm_insert_pfn(vma, vm_end, page_to_pfn(m_page->page));
 
 				if (unlikely(0 != ret)) {
 					/*will return -EBUSY If the page has already been mapped into table, but it's OK*/
@@ -439,7 +439,7 @@ _mali_osk_errcode_t mali_mem_os_resize_cpu_map_locked(mali_mem_backend *mem_bken
 		list_for_each_entry(m_page, &os_mem->pages, list) {
 			if (count >= offset) {
 
-				ret = vmf_insert_pfn(vma, vstart, page_to_pfn(m_page->page));
+				ret = vm_insert_pfn(vma, vstart, page_to_pfn(m_page->page));
 
 				if (unlikely(0 != ret)) {
 					/*will return -EBUSY If the page has already been mapped into table, but it's OK*/
